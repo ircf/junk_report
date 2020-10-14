@@ -60,16 +60,17 @@ class junk_report extends rcube_plugin
 
     $table = new html_table(array('cols' => 2, 'class' => 'propform'));
 
-    $table->add('title', html::label('', 'frequency'));
-    $table->add('',  html::tag('input', array(
-      'type' => 'text',
-      'name' => '_frequency',
-      'value' => $frequency
-    )));
+    $table->add('title', html::label('', $this->gettext('frequency')));
+    $select = new html_select(array('name' => '_frequency'));
+    $select->add($this->gettext('never'), 'never');
+    $select->add($this->gettext('daily'), 'daily');
+    $select->add($this->gettext('weekly'), 'weekly');
+    $select->add($this->gettext('monthly'), 'monthly');
+    $table->add('', $select->show());
 
-    $table->add('title', html::label('', 'maxlength'));
+    $table->add('title', html::label('', $this->gettext('maxlength')));
     $table->add('',  html::tag('input', array(
-      'type' => 'text',
+      'type' => 'number',
       'name' => '_maxlength',
       'value' => $maxlength
     )));
