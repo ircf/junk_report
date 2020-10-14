@@ -10,8 +10,9 @@
  */
 class junk_report extends rcube_plugin
 {
-  const DEFAULT_FREQUENCY = 'never';
-  const DEFAULT_MAXLENGTH = 50;
+  const DEFAULT_JUNKDIR = 'Junk'; // TODO config option
+  const DEFAULT_FREQUENCY = 'never'; // TODO config option
+  const DEFAULT_MAXLENGTH = 100; // TODO config option
   public $task = 'settings';
   private $rcmail;
 
@@ -22,8 +23,8 @@ class junk_report extends rcube_plugin
     $this->add_texts('localization/', true);
     $this->require_plugin('markasjunk2');
 
-    $this->register_action('plugin.junk_report', array($this, 'init_html'));
-    $this->register_action('plugin.junk_report.show', array($this, 'init_html'));
+    $this->register_action('plugin.junk_report', array($this, 'show'));
+    $this->register_action('plugin.junk_report.show', array($this, 'show'));
     $this->register_action('plugin.junk_report.save', array($this, 'save'));
     $this->register_action('plugin.junk_report.not_junk', array($this, 'not_junk'));
     $this->register_action('plugin.junk_report.cron', array($this, 'cron'));
@@ -31,6 +32,9 @@ class junk_report extends rcube_plugin
     $this->add_hook('settings_actions', array($this, 'settings_actions'));
   }
 
+  /**
+   * add settings tab
+   */
   function settings_actions($args)
   {
     $args['actions'][] = array(
@@ -42,17 +46,17 @@ class junk_report extends rcube_plugin
     return $args;
   }
 
-  function init_html()
-  {
-    $this->register_handler('plugin.body', array($this, 'show'));
-    $this->rcmail->output->set_pagetitle($this->gettext('title'));
-    $this->rcmail->output->send('plugin');
-  }
-
   /**
    * display settings form
    */
   function show()
+  {
+    $this->register_handler('plugin.body', array($this, 'show_body'));
+    $this->rcmail->output->set_pagetitle($this->gettext('title'));
+    $this->rcmail->output->send('plugin');
+  }
+
+  function show_body()
   {
     // TODO read from user preferences
     $frequency = self::DEFAULT_FREQUENCY;
@@ -97,8 +101,8 @@ class junk_report extends rcube_plugin
 
   /**
    * save junk_report settings :
-   * $frequency : never, daily, weekly, monthly (default to never)
-   * $maxlength : integer (default to 100)
+   * $frequency : never, daily, weekly, monthly (default to DEFAULT_FREQUENCY)
+   * $maxlength : integer (default to DEFAULT_MAXLENGTH)
    */
   function save()
   {
@@ -112,7 +116,17 @@ class junk_report extends rcube_plugin
    */
   function not_junk()
   {
-    // TODO
+    $this->register_handler('plugin.body', array($this, 'not_junk_body'));
+    $this->rcmail->output->set_pagetitle($this->gettext('not_junk'));
+    $this->rcmail->output->send('plugin');
+  }
+
+  function not_junk_body()
+  {
+    // TODO authenticate
+    return html::p(array('class' => ''), $this->gettext('auth_failed'));
+    // TODO mark as not junk
+    return html::p(array('class' => ''), $this->gettext('not_junk_done'));
   }
 
   /**
