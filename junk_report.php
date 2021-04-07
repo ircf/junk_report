@@ -14,11 +14,16 @@ class junk_report extends rcube_plugin
   const DEFAULT_FREQUENCY = 'never'; // TODO config option
   const DEFAULT_MAXLENGTH = 100; // TODO config option
   public $task = 'settings';
+  private $user;
+  private $prefs;
   private $rcmail;
 
   function init()
   {
     $this->rcmail = rcmail::get_instance();
+    $this->user = $this->rcmail->user;
+    $this->prefs = $this->user->get_prefs();
+    print_r($this->prefs);
     $this->load_config();
     $this->add_texts('localization/', true);
     $this->require_plugin('markasjunk2');
@@ -58,9 +63,14 @@ class junk_report extends rcube_plugin
 
   function show_body()
   {
-    // TODO read from user preferences
-    $frequency = self::DEFAULT_FREQUENCY;
-    $maxlength = self::DEFAULT_MAXLENGTH;
+    //read from user preferences
+    if (!(isset($this->prefs["frequency"]) && isset($this->prefs["maxlength"]))) {
+      $frequency = self::DEFAULT_FREQUENCY;
+      $maxlength = self::DEFAULT_MAXLENGTH;
+    } else {
+      $frequency = $this->prefs["freqeuncy"];
+      $maxlength = $this->prefs["maxlength"];
+    }
 
     $table = new html_table(array('cols' => 2, 'class' => 'propform'));
 
@@ -106,7 +116,11 @@ class junk_report extends rcube_plugin
    */
   function save()
   {
-    // TODO
+    $frequency = rcube_utils::get_input_value('_frequency',rcube_utils::INPUT_POST);
+    $maxlength = rcube_utils::get_input_value('_maxlength',rcube_utils::INPUT_POST);
+    $this->prefs["frequency"] = $frequency;
+    $this->prefs["maxlength"] = $maxlength;
+    $this->user->save_prefs($this->prefs);
   }
 
   /**
