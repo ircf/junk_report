@@ -23,7 +23,6 @@ class junk_report extends rcube_plugin
     $this->rcmail = rcmail::get_instance();
     $this->user = $this->rcmail->user;
     $this->prefs = $this->user->get_prefs();
-    print_r($this->prefs);
     $this->load_config();
     $this->add_texts('localization/', true);
     $this->require_plugin('markasjunk2');
@@ -68,7 +67,7 @@ class junk_report extends rcube_plugin
       $frequency = self::DEFAULT_FREQUENCY;
       $maxlength = self::DEFAULT_MAXLENGTH;
     } else {
-      $frequency = $this->prefs["freqeuncy"];
+      $frequency = $this->prefs["frequency"];
       $maxlength = $this->prefs["maxlength"];
     }
 
@@ -86,7 +85,9 @@ class junk_report extends rcube_plugin
     $table->add('',  html::tag('input', array(
       'type' => 'number',
       'name' => '_maxlength',
-      'value' => $maxlength
+      'value' => $maxlength,
+      'min' => 1,
+      'required' => true
     )));
 
     return html::tag('form', array(
@@ -152,5 +153,17 @@ class junk_report extends rcube_plugin
   function cron()
   {
     // TODO
+    while(false !== ($domaine = opendir('/var/vmail'))){
+      if ($domaine != '.' && $domaine != '..') {
+        while(false !== ($user = opendir('/var/vmail/$domaine'))){
+          if($user != '.' && $user != '..'){
+            $mails = scandir('/var/vmail/$domaine/$user/Maildir/.Junk/cur');
+            
+	  }
+        }
+      }
+    }
+
   }
+
 }
