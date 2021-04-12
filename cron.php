@@ -77,17 +77,17 @@ foreach ($domaineDirectory as $domaine){
 
 	        $file = file("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
 
-                $sender = explode(":",preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]])[1];
+                $sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
 	        //if (empty($sender)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
 
               	if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
-                  $date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
-              	}else{
+                  $date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
+	      	}else{
 	          $date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
-                }
+        	}
 
 	        if (preg_grep("/^Subject:/",$file))
-	          $subject = explode(":",preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]])[1];
+	          $subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
 	        else
 	          $subject = "Pas d'objet";
 	        //if (empty($subject)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
@@ -101,8 +101,19 @@ foreach ($domaineDirectory as $domaine){
 	    }
           }
 	  }
-	  if (!empty($listeMail))
-	    print_r($listeMail);
+	  if (!empty($listeMail)){
+	    $adresseMail = "test@akiway.com";
+	    $subject = "Rapport de spam";
+	    $header[] = "From : technique@ircf.fr";
+	    $header[] = 'Content-type: text/html; charset=UTF-8';
+	    $message = '<html><body>';
+	    $message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th></tr>';
+	    foreach ($listeMail as $mail){
+ 	      $message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.$mail["sender"].'</td><td>'.$mail["date"].'</td></tr>';
+   	    }
+	    $message .= '</table></body></html>';
+	    mail($adresseMail,$subject,$message,implode("\r\n", $header));
+	  }
 	}
       }
     }
