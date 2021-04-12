@@ -59,15 +59,18 @@ foreach ($domaineDirectory as $domaine){
   if ($domaine != '.' && $domaine != '..' && is_dir("$dir/$domaine")){
     $userDirectory = scandir("$dir/$domaine");
     foreach ($userDirectory as $user){
+      //echo "$dir/$domaine/$user";
       if ($user != '.' && $user != '..' && is_dir("$dir/$domaine/$user")){
 	$adresseMail = "$user@$domaine";
         $preferencesUser = $tabPrefs["$adresseMail"];
 	$frequency = $preferencesUser["frequency"];
-	if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")){
-	if (($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily")){
+	print_r($preferencesUser);
+	if (file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")){
+	if ($frequency == "daily" || strcmp($frequency,"weekly") !== 0 && $weekly || strcmp($frequency,"monthly") !== 0 && $monthly){
+	if ($frequency != "never"){
           $junkDirectory = scandir("$dir/$domaine/$user/Maildir/.Junk/cur");
 	  array_splice($listeMail,0);
-	echo "\n";
+	echo "test";
 	  foreach ($junkDirectory as $junk){
             if ($junk != '.' && $junk != '..'){
 
@@ -94,9 +97,10 @@ foreach ($domaineDirectory as $domaine){
               array_push($listeMail,$mail);
             }
           }
-	  }
 	  //if (!empty($listeMail))
 	    //print_r($listeMail);
+	}
+	}
 	}
       }
     }
