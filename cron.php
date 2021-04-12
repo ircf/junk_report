@@ -1,7 +1,11 @@
-à<?php
+<?php
 //load rc config file
 
 include('/opt/roundcubemail/config/config.inc.php');
+
+//load config file
+
+include('config.inc.php');
 
 //read all users prefs
 
@@ -54,7 +58,7 @@ else
 
 //parse junkdirs and send report
 
-$dir = "/var/vmail";
+$dir = $junk_report_config['domain_path'];
 $listeMail = array();
 $domaineDirectory = scandir($dir);
 foreach ($domaineDirectory as $domaine){
