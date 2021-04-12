@@ -38,7 +38,7 @@ foreach($requete->fetchAll() as $personne){
     if (isset($preferences['frequency']) && isset($preferences['maxlength'])){
       $tabPrefs[$personne['username']] = array("frequency" => $preferences['frequency'], "maxlength" => $preferences['maxlength']);
     }else{
-      $tabPrefs[$personne['username']] = array("frequency" => "never", "maxlength" => 100);
+      $tabPrefs[$personne['username']] = array("frequency" => $default_frequency, "maxlength" => $default_maxlength);
     }
   }
 }
@@ -46,19 +46,18 @@ foreach($requete->fetchAll() as $personne){
 $monthDay = date('d');
 $weekDay = date('l');
 
-if ($weekDay == "Sunday")
+if ($weekDay == $day_of_weekly_report)
   $weekly = true;
 else
   $weekly = false;
 
-if ($monthDay == 01)
+if ($monthDay == $day_of_monthly_report)
   $monthly = true;
 else
   $monthly = false;
 
 //parse junkdirs and send report
 
-$dir = $junk_report_config['domain_path'];
 $listeMail = array();
 $domaineDirectory = scandir($dir);
 foreach ($domaineDirectory as $domaine){
@@ -91,14 +90,14 @@ foreach ($domaineDirectory as $domaine){
         	}
 
 	        if (preg_grep("/^Subject:/",$file))
-	          $subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
+	          $junk_subject = mb_convert_encoding(substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9),"UTF-8");
 	        else
-	          $subject = "Pas d'objet";
+	          $junk_subject = $no_subject;
 	        //if (empty($subject)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
 
 	        $mail["sender"]=$sender;
               	$mail["date"]=$date;
-              	$mail["subject"]=$subject;
+              	$mail["subject"]=$junk_subject;
               	array_push($listeMail,$mail);
 		$nbMails++;
               }
@@ -107,9 +106,6 @@ foreach ($domaineDirectory as $domaine){
 	  }
 	  if (!empty($listeMail)){
 	    $adresseMail = "test@akiway.com";
-	    $subject = "Rapport de spam";
-	    $header[] = "From : technique@ircf.fr";
-	    $header[] = 'Content-type: text/html; charset=UTF-8';
 	    $message = '<html><body>';
 	    $message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th></tr>';
 	    foreach ($listeMail as $mail){
