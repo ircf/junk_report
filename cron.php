@@ -30,10 +30,12 @@ $requete = $conn->query("SELECT * FROM users;");
 
 foreach($requete->fetchAll() as $personne){
   $preferences = unserialize($personne['preferences']);
-  if (isset($preferences['frequency']) && isset($preferences['maxlength'])){
-    $tabPrefs[$personne['username']] = array("frequency" => $preferences['frequency'], "maxlength" => $preferences['maxlength']);
-  }else{
-    $tabPrefs[$personne['username']] = array("frequency" => "never", "maxlength" => 100);
+  if (substr($personne['username'],-9) != ".disabled"){
+    if (isset($preferences['frequency']) && isset($preferences['maxlength'])){
+      $tabPrefs[$personne['username']] = array("frequency" => $preferences['frequency'], "maxlength" => $preferences['maxlength']);
+    }else{
+      $tabPrefs[$personne['username']] = array("frequency" => "never", "maxlength" => 100);
+    }
   }
 }
 
@@ -59,44 +61,48 @@ foreach ($domaineDirectory as $domaine){
   if ($domaine != '.' && $domaine != '..' && is_dir("$dir/$domaine")){
     $userDirectory = scandir("$dir/$domaine");
     foreach ($userDirectory as $user){
+      array_splice($listeMail,0);
       if ($user != '.' && $user != '..' && is_dir("$dir/$domaine/$user")){
 	$adresseMail = "$user@$domaine";
-        $preferencesUser = $tabPrefs["$adresseMail"];
-	$frequency = $preferencesUser["frequency"];
-	if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")){
-	if (($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily")){
-          $junkDirectory = scandir("$dir/$domaine/$user/Maildir/.Junk/cur");
-	  array_splice($listeMail,0);
-	echo "\n";
-	  foreach ($junkDirectory as $junk){
-            if ($junk != '.' && $junk != '..'){
+        if (isset($tabPrefs["$adresseMail"])){
+	  $preferencesUser = $tabPrefs["$adresseMail"];
+	  $frequency = $preferencesUser["frequency"];
+          $maxlength = $preferencesUser["maxlength"];
+	  if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")){
+	  if (($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily")){
+            $junkDirectory = scandir("$dir/$domaine/$user/Maildir/.Junk/cur");
+	    $nbMails=1;
+	    foreach ($junkDirectory as $junk){
+              if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 
-	      $file = file("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
+	        $file = file("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
 
-              $sender = explode(":",preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]])[1];
-	      //if (empty($sender)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
+                $sender = explode(":",preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]])[1];
+	        //if (empty($sender)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
 
-              if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
-                $date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
-              }else{
-	        $date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
+              	if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
+                  $date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
+              	}else{
+	          $date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
+                }
+
+	        if (preg_grep("/^Subject:/",$file))
+	          $subject = explode(":",preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]])[1];
+	        else
+	          $subject = "Pas d'objet";
+	        //if (empty($subject)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
+
+	        $mail["sender"]=$sender;
+              	$mail["date"]=$date;
+              	$mail["subject"]=$subject;
+              	array_push($listeMail,$mail);
+		$nbMails++;
               }
-
-	      if (preg_grep("/^Subject:/",$file))
-	        $subject = explode(":",preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]])[1];
-	      else
-	        $subject = "Pas d'objet";
-	      //if (empty($subject)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
-
-	      $mail["sender"]=$sender;
-              $mail["date"]=$date;
-              $mail["subject"]=$subject;
-              array_push($listeMail,$mail);
-            }
+	    }
           }
 	  }
-	  //if (!empty($listeMail))
-	    //print_r($listeMail);
+	  if (!empty($listeMail))
+	    print_r($listeMail);
 	}
       }
     }
