@@ -43,6 +43,8 @@ foreach($requete->fetchAll() as $personne){
   }
 }
 
+//Read today's date
+
 $monthDay = date('d');
 $weekDay = date('l');
 
@@ -71,45 +73,49 @@ foreach ($domaineDirectory as $domaine){
 	  $preferencesUser = $tabPrefs["$adresseMail"];
 	  $frequency = $preferencesUser["frequency"];
           $maxlength = $preferencesUser["maxlength"];
-	  if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")){
-	  if (($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily")){
+	  if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")&&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily"))){
             $junkDirectory = scandir("$dir/$domaine/$user/Maildir/.Junk/cur");
 	    $nbMails=1;
+	    $uidFile = file("$dir/$domaine/$user/Maildir/.Junk/dovecot-uidlist");
 	    foreach ($junkDirectory as $junk){
               if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 
 	        $file = file("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
 
+		//Get sender
                 $sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
-	        //if (empty($sender)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
 
+		//Get date
               	if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
                   $date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
 	      	}else{
 	          $date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
         	}
 
+		//Get junk_subject
 	        if (preg_grep("/^Subject:/",$file))
-	          $junk_subject = mb_convert_encoding(substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9),"UTF-8");
+	          $junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
 	        else
 	          $junk_subject = $no_subject;
-	        //if (empty($subject)) echo "$dir/$domaine/$user/Maildir/.Junk/cur/$junk";
 
-	        $mail["sender"]=$sender;
+		//Get mail uid
+		$formattedJunk = explode(":","$junk")[0];
+		$uid = explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
+		$mail["sender"]=$sender;
               	$mail["date"]=$date;
               	$mail["subject"]=$junk_subject;
+		$mail["uid"]=$uid;
               	array_push($listeMail,$mail);
 		$nbMails++;
               }
 	    }
-          }
 	  }
 	  if (!empty($listeMail)){
 	    $adresseMail = "test@akiway.com";
 	    $message = '<html><body>';
-	    $message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th></tr>';
+	    $message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th><th style="border:1px solid">UID</th></tr>';
 	    foreach ($listeMail as $mail){
- 	      $message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.$mail["sender"].'</td><td>'.$mail["date"].'</td></tr>';
+ 	      $message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.$mail["sender"].'</td><td>'.$mail["date"].'</td><td style="border:1px solid"><a href="https://mail3.ircf.fr/?_task=settings&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a></td></tr>';
    	    }
 	    $message .= '</table></body></html>';
 	    mail($adresseMail,$subject,$message,implode("\r\n", $header));
@@ -119,4 +125,3 @@ foreach ($domaineDirectory as $domaine){
     }
   }
 }
-
