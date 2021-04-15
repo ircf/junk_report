@@ -75,9 +75,16 @@ foreach ($domaineDirectory as $domaine){
           $maxlength = $preferencesUser["maxlength"];
 	  if ($frequency!="never" && file_exists("$dir/$domaine/$user/Maildir/.Junk/cur")&&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily"))){
             $junkDirectory = scandir("$dir/$domaine/$user/Maildir/.Junk/cur");
+	    array_splice($sortedJunkDirectory,0);
+	    foreach ($junkDirectory as $junk){
+	      $date = filemtime("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
+	      $sortedJunkDirectory["$date"] = $junk;
+	    }
+	    ksort($sortedJunkDirectory);
+	    print_r($sortedJunkDirectory);
 	    $nbMails=1;
 	    $uidFile = file("$dir/$domaine/$user/Maildir/.Junk/dovecot-uidlist");
-	    foreach ($junkDirectory as $junk){
+	    foreach ($sortedJunkDirectory as $junk){
               if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 
 	        $file = file("$dir/$domaine/$user/Maildir/.Junk/cur/$junk");
