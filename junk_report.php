@@ -13,7 +13,7 @@ class junk_report extends rcube_plugin
   const DEFAULT_JUNKDIR = 'Junk'; // TODO config option
   const DEFAULT_FREQUENCY = 'never'; // TODO config option
   const DEFAULT_MAXLENGTH = 100; // TODO config option
-  public $task = 'settings';
+  public $task = 'mail|settings';
   private $user;
   private $prefs;
   private $rcmail;
@@ -139,8 +139,11 @@ class junk_report extends rcube_plugin
   function not_junk_body()
   {
     // TODO authenticate
-    return html::p(array('class' => ''), $this->gettext('auth_failed'));
+    //return html::p(array('class' => ''), $this->gettext('auth_failed'));
     // TODO mark as not junk
+    $uid = rcube_utils::get_input_value('_uid',rcube_utils::INPUT_GET);
+    $this->rcmail->storage->move_message($uid,'INBOX','Junk');
+    header("Location: https://mail3.ircf.fr/?_task=mail&_mbox=INBOX");
     return html::p(array('class' => ''), $this->gettext('not_junk_done'));
   }
 
@@ -153,17 +156,5 @@ class junk_report extends rcube_plugin
   function cron()
   {
     // TODO
-    while(false !== ($domaine = opendir('/var/vmail'))){
-      if ($domaine != '.' && $domaine != '..') {
-        while(false !== ($user = opendir('/var/vmail/$domaine'))){
-          if($user != '.' && $user != '..'){
-            $mails = scandir('/var/vmail/$domaine/$user/Maildir/.Junk/cur');
-            
-	  }
-        }
-      }
-    }
-
   }
-
 }
