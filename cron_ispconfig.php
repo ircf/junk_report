@@ -19,7 +19,7 @@ $dsnArray = formatDSN($config['db_dsnw']);
 $dsn = $dsnArray[0];
 $username = $dsnArray[1];
 $password = $dsnArray[2];
-print_r($dsnArray);
+
 try {
   $conn = new PDO($dsn, $username, $password);
   // set the PDO error mode to exception
@@ -120,7 +120,7 @@ foreach ($arrayEmailKeys as $email){
 	          				$junk_subject = $config['no_subject'];
 
 					//Get spam score
-					$spam_score = 
+					$spam_score = substr(preg_grep("/^X-Spam-Score:/",$file)[array_keys(preg_grep("/^X-Spam-Score:/",$file))[0]],14);
 
 					//Get mail uid
 					$formattedJunk = explode(":","$junk")[0];
@@ -129,6 +129,7 @@ foreach ($arrayEmailKeys as $email){
 					$mail["sender"]=$sender;
               				$mail["date"]=$date;
 					$mail["subject"]=iconv_mime_decode($junk_subject);
+					$mail["spam_score"]=$spam_score;
 					$mail["uid"]=$uid;
 
 					if ($mail["sender"] == "") echo "sender : $email $junk \n";
@@ -148,9 +149,11 @@ foreach ($arrayEmailKeys as $email){
 		    	$date .= getdate()["year"];
 		    	$subject = $config['subject'];
 	    		$message = '<html><body>';
-			$message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th><th style="border:1px solid">UID</th></tr>';
+			$message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th><th style="border:1px solid">Spam Score</th></tr>';
 		    	foreach ($listeMail as $mail){
-	      			$message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td><td>'.$mail["date"].'</td><td style="border:1px solid"><a href="https://mail3.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a></td></tr>';
+	      			$message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
+				$message .= '<td>'.$mail["date"].'</td><td style="border:1px solid">'.$mail["spam_score"].'</td>';
+				$message .= '<td style="border:1px solid"><a href="https://mail3.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a></td></tr>';
    	    		}
 		    	$message .= '</table></body></html>';
 		    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
