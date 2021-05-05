@@ -6,8 +6,11 @@
 *
 */
 
+//Formatted dsn of ispconfig db
+$config['dsn_ispconfig'] = "mysql://user:pass@server/dbname";
+
 //Name of the mail host
-$config['mail_host']="mail.ircf.fr";
+$config['mail_host']="name.host";
 
 //Path to the domain file
 $config['dir'] = "/var/vmail";
@@ -30,8 +33,19 @@ $config['day_of_monthly_report'] = 01;
 $config['no_subject'] = "Aucun objet";
 
 //Header settings
-$header[] = "From : technique@ircf.fr";
+$header[] = "From : ";
 $header[] = "Content-type: text/html; charset=UTF-8";
 
 //Subject of the junk report
 $config['subject'] = "Rapport de spam";
+
+//Sleep time between sending emails in micro secondes
+$config['sleep_time'] = 200000;
+
+// Absolute path of the file containing the mail to send
+// Must to be written in html
+// Add {{spam_table}} somewhere to show where the spam table should be in your mail otherwise it will be placed at the end.
+// It must also be alone in a line.
+$config['path_to_mail'] = "/path/to/template_mail";
+
+
