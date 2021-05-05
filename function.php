@@ -55,3 +55,68 @@ function matchPrefstoEmail($requete_ispc,$tab,$config){
 	return $tabPrefs;
 
 }
+
+/*
+*	Get the sender of a mail from his stored file given in parameters.
+*	Return the sender mail adress
+*/
+function getSender($file){
+	return $sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
+}
+
+/*
+*	Get the date of a mail from hisstored file given in parameters.
+*	Return the date translated in French
+*/
+
+function getMailDate($file){
+	if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
+		if (@explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1])
+			$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
+		else
+			$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
+	}else{
+		$date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
+	}
+	$arrayDate = explode(" ",$date);
+	$day = $arrayDate[1];
+	$month = $arrayDate[2];
+	$year = $arrayDate[3];
+	switch ($month) {
+		case "Jan":
+			$month = "Janvier";
+			break;
+		case "Feb":
+			$month = "Fevrier";
+			break;
+		case "Apr":
+			$month = "Avril";
+			break;
+		case "May":
+			$month = "Mai";
+			break;
+		case "Jun":
+			$month = "Juin";
+			break;
+		case "Jul":
+                        $month = "Juillet";
+                        break;
+		case "Aug":
+                        $month = "Aout";
+                        break;
+		case "Sep":
+                        $month = "Septembre";
+                        break;
+		case "Oct":
+                        $month = "Octobre";
+                        break;
+		case "Nov":
+                        $month = "Novembre";
+                        break;
+		case "Dec":
+                        $month = "Decembre";
+                        break;
+	}
+	$formattedDate = $day." ".$month." ".$year;
+	return $formattedDate;
+}

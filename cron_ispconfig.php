@@ -99,17 +99,10 @@ foreach ($arrayEmailKeys as $email){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
 
 				//Get sender
-                		$sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
+                		$sender = getSender($file);
 
 				//Get date
-       		      		if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
-			  		if (@explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1])
-	    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
-	  				else
-	    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
-				}else{
-	          			$date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
-       				}
+       		      		$date = getMailDate($file);
 
 				//Get junk_subject
 		        	if (preg_grep("/^Subject:/",$file))
