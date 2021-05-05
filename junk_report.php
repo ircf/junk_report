@@ -131,6 +131,9 @@ class junk_report extends rcube_plugin
    */
   function not_junk()
   {
+    $this->rcmail->output->include_script('../../plugins/markasjunk2/markasjunk2.js');
+    $this->rcmail->output->include_script('../../plugins/junk_report/junk_report.js');
+    $this->require_plugin('markasjunk2');
     $this->register_handler('plugin.body', array($this, 'not_junk_body'));
     $this->rcmail->output->set_pagetitle($this->gettext('not_junk'));
     $this->rcmail->output->send('plugin');
@@ -140,10 +143,46 @@ class junk_report extends rcube_plugin
   {
     // TODO authenticate
     //return html::p(array('class' => ''), $this->gettext('auth_failed'));
+
     // TODO mark as not junk
     $uid = rcube_utils::get_input_value('_uid',rcube_utils::INPUT_GET);
-    $this->rcmail->storage->move_message($uid,'INBOX','Junk');
-    header("Location: https://mail3.ircf.fr/?_task=mail&_mbox=INBOX");
+
+    // V1 : use rcmail : code is executed after load, but list does not work, markasjunk functions are prefixed with "rcmail."
+    //$this->rcmail->output->command('command', 'list', "Junk");
+    //$this->rcmail->output->set_env('uid', $uid);
+    //echo "<script>console.table($temp)</script>";
+    //$this->rcmail->output->command('rcmail_markasjunk2_notjunk', '');
+    //$this->rcmail->output->command('rcmail_markasjunk2_move','INBOX',$uid);
+
+    // V2 : use api does nothing
+    //$this->api->output->command('command', 'list', "Junk");
+
+    // V3 : use external js
+    //$this->rcmail->output->command('rcmail_junk_report_move', $uid);
+
+    // V4 : mix php and js
+    // This is only working after 3 repeats of clicking the restore link
+    // Also, this had to be done on the same page (not the one created) and you don't refresh the page
+    // Maybe it could be the cache?
+
+    $this->rcmail->output->set_env('uid', $uid);
+    $this->rcmail->output->command('rcmail_junk_report_move', $uid);
+
+    //$is_spam = false;
+    $multi_folder = false;
+    $messageset = rcmail::get_uids();
+    //$mbox_name = 'Junk';
+    $dest_mbox = 'INBOX';
+
+    $this->_do_salearn($uid,false); 	//This is the function that learns the Bayensian
+
+    //if ($this->rcmail->storage->move_message($uid, 'INBOX', 'Junk')) echo "<script>console.log('moved')</script>";
+    //$this->rcmail->output->command('rcmail_markasjunk2', 'not_junk');
+    $this->api->output->command('rcmail_markasjunk2_move', $dest_mbox, $this->_messageset_to_uids($messageset, $multi_folder));
+
+    //$this->api->output->command('display_message', $is_spam ? $this->gettext('reportedasjunk') : $this->gettext('reportedasnotjunk'), 'confirmation');
+    //$this->api->output->send(); 	//make 404
+
     return html::p(array('class' => ''), $this->gettext('not_junk_done'));
   }
 
@@ -157,4 +196,72 @@ class junk_report extends rcube_plugin
   {
     // TODO
   }
+
+private function _messageset_to_uids($messageset, $multi_folder)
+        {
+                $a_uids = array();
+
+                foreach ($messageset as $mbox => $uids) {
+                        foreach ($uids as $uid) {
+                                $a_uids[] = $multi_folder ? $uid . '-' . $mbox : $uid;
+                        }
+                }
+
+                return $a_uids;
+	}
+
+// Maybe make a driver for it, but this function is only used in one situation
+
+private function _do_salearn($uids, $spam)
+        {
+                $rcmail = rcube::get_instance();
+                $temp_dir = realpath($rcmail->config->get('temp_dir'));
+
+                if ($spam)
+                        $command = $rcmail->config->get('markasjunk2_spam_cmd');
+                else
+                        $command = $rcmail->config->get('markasjunk2_ham_cmd');
+
+                if (!$command)
+                        return;
+
+                $command = str_replace('%u', $_SESSION['username'], $command);
+                $command = str_replace('%l', $rcmail->user->get_username('local'), $command);
+                $command = str_replace('%d', $rcmail->user->get_username('domain'), $command);
+                if (preg_match('/%i/', $command)) {
+                        $identity_arr = $rcmail->user->get_identity();
+                        $command = str_replace('%i', $identity_arr['email'], $command);
+                }
+
+                foreach ($uids as $uid) {
+                        // reset command for next message
+                        $tmp_command = $command;
+
+                        // get DSPAM signature from header (if %xds macro is used)
+                        if (preg_match('/%xds/', $command)) {
+                                if (preg_match('/^X\-DSPAM\-Signature:\s+((\d+,)?([a-f\d]+))\s*$/im', $rcmail->storage->get_raw_headers($uid), $dspam_signature))
+                                        $tmp_command = str_replace('%xds', $dspam_signature[1], $tmp_command);
+                                else
+                                        continue; // no DSPAM signature found in headers -> continue with next uid/message
+                        }
+
+		if (preg_match('/%f/', $command)) {
+                                $tmpfname = tempnam($temp_dir, 'rcmSALearn');
+                                file_put_contents($tmpfname, $rcmail->storage->get_raw_body($uid));
+                                $tmp_command = str_replace('%f', $tmpfname, $tmp_command);
+                        }
+
+                        exec($tmp_command, $output);
+
+                        if ($rcmail->config->get('markasjunk2_debug')) {
+                                rcube::write_log('markasjunk2', $tmp_command);
+                                rcube::write_log('markasjunk2', $output);
+                        }
+
+                        if (preg_match('/%f/', $command))
+                                unlink($tmpfname);
+
+                        $output = '';
+                }
+        }
 }
