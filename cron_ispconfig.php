@@ -79,85 +79,111 @@ $arrayEmailKeys = array_keys($tabPrefs);
 foreach ($arrayEmailKeys as $email){
 	$currentAdress = $tabPrefs[$email];
 	array_splice($listeMail,0);
-	if ($temp<10){
-		$frequency = $currentAdress["frequency"];
-        	$maxlength = $currentAdress["maxlength"];
-	  	$maildir = $currentAdress["maildir"];
-	  	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily"))){
-            		$junkDirectory = scandir("$maildir/Maildir/.Junk/cur");
+	$frequency = $currentAdress["frequency"];
+        $maxlength = $currentAdress["maxlength"];
+	$maildir = $currentAdress["maildir"];
+	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily"))){
+        	$junkDirectory = scandir("$maildir/Maildir/.Junk/cur");
 
-			//Sort spam by date (new first)
-	    		array_splice($sortedJunkDirectory,0);
-		    	foreach ($junkDirectory as $junk){
-		      		$date = filemtime("$maildir/Maildir/.Junk/cur/$junk");
-	      			$sortedJunkDirectory["$date"] = $junk;
-	    		}
-		    	ksort($sortedJunkDirectory);
-		    	$nbMails=1;
-	    		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
-			foreach ($sortedJunkDirectory as $junk){
-              			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
+		//Sort spam by date (new first)
+   		array_splice($sortedJunkDirectory,0);
+	    	foreach ($junkDirectory as $junk){
+	      		$date = filemtime("$maildir/Maildir/.Junk/cur/$junk");
+      			$sortedJunkDirectory["$date"] = $junk;
+    		}
+	    	ksort($sortedJunkDirectory);
+	    	$nbMails=1;
+    		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
+		foreach ($sortedJunkDirectory as $junk){
+       			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
+		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
 
-			        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
+				//Get sender
+                		$sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
 
-					//Get sender
-        	        		$sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
+				//Get date
+       		      		if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
+			  		if (@explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1])
+	    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
+	  				else
+	    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
+				}else{
+	          			$date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
+       				}
 
-					//Get date
-        		      		if (explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])){
-				  		if (@explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1])
-		    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[1],0,-3);
-		  				else
-		    					$date = substr(explode(",",explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1])[0],0,-3);
-					}else{
-		          			$date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
-        				}
+				//Get junk_subject
+		        	if (preg_grep("/^Subject:/",$file))
+        		  		$junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
+        			else
+          				$junk_subject = $config['no_subject'];
 
-					//Get junk_subject
-			        	if (preg_grep("/^Subject:/",$file))
-	        		  		$junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
-	        			else
-	          				$junk_subject = $config['no_subject'];
+				//Get spam score
+				$spam_score = substr(preg_grep("/^X-Spam-Score:/",$file)[array_keys(preg_grep("/^X-Spam-Score:/",$file))[0]],14);
 
-					//Get spam score
-					$spam_score = substr(preg_grep("/^X-Spam-Score:/",$file)[array_keys(preg_grep("/^X-Spam-Score:/",$file))[0]],14);
+				//Get mail uid
+				$formattedJunk = explode(":","$junk")[0];
+				$uid = explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
 
-					//Get mail uid
-					$formattedJunk = explode(":","$junk")[0];
-					$uid = explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
+				$mail["sender"]=$sender;
+       				$mail["date"]=$date;
+				$mail["subject"]=iconv_mime_decode($junk_subject);
+				$mail["spam_score"]=$spam_score;
+				$mail["uid"]=$uid;
 
-					$mail["sender"]=$sender;
-              				$mail["date"]=$date;
-					$mail["subject"]=iconv_mime_decode($junk_subject);
-					$mail["spam_score"]=$spam_score;
-					$mail["uid"]=$uid;
-
-					if ($mail["sender"] == "") echo "sender : $email $junk \n";
-					if ($mail["date"] == "") echo "date : $email $junk \n";
-					if ($mail["subject"] == "") echo "subject : $email $junk \n";
-        	      			array_push($listeMail,$mail);
-					$nbMails++;
-              			}
-			}
-		}
-
-		if (!empty($listeMail)){
-			$temp++;
-		    	$adresseMail = "test@akiway.com";
-		    	$date = getdate()["mday"];
-	    		$date .= getdate()["mon"];
-		    	$date .= getdate()["year"];
-		    	$subject = $config['subject'];
-	    		$message = '<html><body>';
-			$message .= '<table style="border:1px solid; border-collapse:collapse"><tr><th>Objet</th><th style="border:1px solid">Envoyé par</th><th>Date</th><th style="border:1px solid">Spam Score</th></tr>';
-		    	foreach ($listeMail as $mail){
-	      			$message .= '<tr style="border:1px solid"><td>'.$mail["subject"].'</td><td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
-				$message .= '<td>'.$mail["date"].'</td><td style="border:1px solid">'.$mail["spam_score"].'</td>';
-				$message .= '<td style="border:1px solid"><a href="https://mail3.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a></td></tr>';
-   	    		}
-		    	$message .= '</table></body></html>';
-		    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
-			usleep($config['sleep_time']);
+				if ($mail["sender"] == "") echo "sender : $email $junk \n";
+				if ($mail["date"] == "") echo "date : $email $junk \n";
+				if ($mail["subject"] == "") echo "subject : $email $junk \n";
+       	      			array_push($listeMail,$mail);
+				$nbMails++;
+       			}
 		}
 	}
+
+	if (!empty($listeMail)){
+	    	$adresseMail = "test@akiway.com";
+	    	$date = getdate()["mday"];
+    		$date .= getdate()["mon"];
+	    	$date .= getdate()["year"];
+	    	$subject = $config['subject'];
+		$message = "";
+		$table = "";
+		$template_mail = file($config["path_to_mail"]);
+		$table_line = array_keys(preg_grep("/{{spam_table}}/",$template_mail))[0];
+		$table .= '<table style="border:1px solid; border-collapse:collapse">';
+		$table .= '<tr>';
+		$table .= '<th>Objet</th>';
+		$table .= '<th style="border:1px solid">Envoyé par</th>';
+		$table .= '<th>Date</th>';
+		$table .= '<th style="border:1px solid">Spam Score</th>';
+		$table .= '</tr>';
+	    	foreach ($listeMail as $mail){
+      			$table .= '<tr style="border:1px solid">';
+			$table .= '<td>'.$mail["subject"].'</td>';
+			$table .= '<td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
+			$table .= '<td>'.$mail["date"].'</td>';
+			$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
+			$table .= '<td style="border:1px solid">';
+			$table .= '<a href="https://mail3.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a>';
+			$table .= '</td>';
+			$table .= '</tr>';
+		}
+		$table .= '</table>';
+		$count = 0;
+		$added_table = false;
+		foreach ($template_mail as $line){
+			if ($count == $table_line){
+				$message .= $table;
+				$added_table = true;
+			}else{
+				$message .= $line;
+			}
+			$count++;
+		}
+		if (!$added_table){
+			$message .= $table;
+		}
+	    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
+		usleep($config['sleep_time']);
+	}
 }
+
