@@ -23,6 +23,7 @@ function setPreferencesArray($requete,$config){
 /*
 *	Formats a dsn of the form mysql://user:pass@hostname/databasename and returns an array(dsn, user, pass) to use PDO.
 */
+
 function formatDSN($dsn){
 
 	preg_match('|([a-z]+)://([^:]*)(:(.*))?@([A-Za-z0-9\.-]*)(/([0-9a-zA-Z_/\.]*))|',
@@ -60,6 +61,7 @@ function matchPrefstoEmail($requete_ispc,$tab,$config){
 *	Get the sender of a mail from his stored file given in parameters.
 *	Return the sender mail adress
 */
+
 function getSender($file){
 	return $sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
 }
@@ -119,4 +121,37 @@ function getMailDate($file){
 	}
 	$formattedDate = $day." ".$month." ".$year;
 	return $formattedDate;
+}
+
+/*
+*       Get the spam-score of a mail from his stored file given in parameters.
+*       Return the spam-score
+*/
+
+function getSpamScore($file){
+	return substr(preg_grep("/^X-Spam-Score:/",$file)[array_keys(preg_grep("/^X-Spam-Score:/",$file))[0]],14);
+}
+
+/*
+*	Get the uid of a mail from the dovecot-uid file
+*	Get in parameters the uid-file as array and the name of the mail file
+*/
+
+function getUID($uidFile, $junk){
+	$formattedJunk = explode(":","$junk")[0];
+        return explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
+}
+
+/*
+*       Get the subject of a mail from his stored file given in parameters.
+*       Return the spam-score or the default value set in the config.
+*/
+
+function getSubject($file, $config){
+	if (preg_grep("/^Subject:/",$file))
+		$junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
+       	else
+    		$junk_subject = $config['no_subject'];
+
+	return $junk_subject;
 }

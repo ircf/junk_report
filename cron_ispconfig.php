@@ -74,7 +74,6 @@ else
 
 $listeMail = array();
 $sortedJunkDirectory = array();
-$temp = 0;
 $arrayEmailKeys = array_keys($tabPrefs);
 foreach ($arrayEmailKeys as $email){
 	$currentAdress = $tabPrefs[$email];
@@ -105,17 +104,13 @@ foreach ($arrayEmailKeys as $email){
        		      		$date = getMailDate($file);
 
 				//Get junk_subject
-		        	if (preg_grep("/^Subject:/",$file))
-        		  		$junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
-        			else
-          				$junk_subject = $config['no_subject'];
+		        	$junk_subject = getSubject($file, $config);
 
 				//Get spam score
-				$spam_score = substr(preg_grep("/^X-Spam-Score:/",$file)[array_keys(preg_grep("/^X-Spam-Score:/",$file))[0]],14);
+				$spam_score = getSpamScore($file);
 
 				//Get mail uid
-				$formattedJunk = explode(":","$junk")[0];
-				$uid = explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
+				$uid = getUID($uidFile,$junk);
 
 				$mail["sender"]=$sender;
        				$mail["date"]=$date;
@@ -123,9 +118,6 @@ foreach ($arrayEmailKeys as $email){
 				$mail["spam_score"]=$spam_score;
 				$mail["uid"]=$uid;
 
-				if ($mail["sender"] == "") echo "sender : $email $junk \n";
-				if ($mail["date"] == "") echo "date : $email $junk \n";
-				if ($mail["subject"] == "") echo "subject : $email $junk \n";
        	      			array_push($listeMail,$mail);
 				$nbMails++;
        			}
@@ -179,4 +171,3 @@ foreach ($arrayEmailKeys as $email){
 		usleep($config['sleep_time']);
 	}
 }
-
