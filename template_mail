@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Template mail</title>
+</head>
+<body>
+	<p>Bonjour,</p>
+
+	<p>Vous retrouverez ci-dessous un tableau récapitulatif de vos derniers pourriels reçus.</p>
+
+	<p>Vous pouvez rétablir ces mails en cliquant sur le lien "Rétablir".</p>
+
+	{{spam_table}}
+
+	<p>Nous restons à votre disposition pour tout renseignement ou correction.</p>
+
+	<p>Cordialement,</p>
+
+	<br>
+	<p>Service technique IRCF</p>
+	<p>Pour la maintenance de votre site internet et de votre messagerie</p>
+	<p>Tél. : </p>
+	<p>E-mail : </p>
+
+	<br>
+	
+	<p>www.ircf.fr</p>
+	<br>
+	
+	<p>Les données et renseignements contenus dans ce message sont personnels, confidentiels et secrets. Toute publication, utilisation ou diffusion, même partielle, doit être autorisée.</p>
+	<p>Any data and information contained in this electronic mail is personal, confidential and secret. Any total or partial publication, use or distribution must be authorized.</p>
+
+</body>
+</html>
