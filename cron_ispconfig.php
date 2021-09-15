@@ -91,8 +91,10 @@ foreach ($arrayEmailKeys as $email){
       			$sortedJunkDirectory["$date"] = $junk;
     		}
 	    	ksort($sortedJunkDirectory);
-	    	$nbMails=1;
-    		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
+
+		$nbMails=1;
+		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
+print_r($maildir);
 		foreach ($sortedJunkDirectory as $junk){
        			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
@@ -125,7 +127,7 @@ foreach ($arrayEmailKeys as $email){
 	}
 
 	if (!empty($listeMail)){
-	    	$adresseMail = "test@akiway.com";
+	    	$adresseMail = "lucas.raynaud@ircf.fr";
 	    	$date = getdate()["mday"];
     		$date .= getdate()["mon"];
 	    	$date .= getdate()["year"];
@@ -148,7 +150,7 @@ foreach ($arrayEmailKeys as $email){
 			$table .= '<td>'.$mail["date"].'</td>';
 			$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
 			$table .= '<td style="border:1px solid">';
-			$table .= '<a href="https://mail3.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_action=plugin.junk_report.not_junk">Rétablir</a>';
+			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
 			$table .= '</td>';
 			$table .= '</tr>';
 		}
@@ -168,6 +170,6 @@ foreach ($arrayEmailKeys as $email){
 			$message .= $table;
 		}
 	    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
-		usleep($config['sleep_time']);
+		sleep($config['sleep_time']);
 	}
 }
