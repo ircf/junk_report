@@ -79,7 +79,7 @@ class junk_report extends rcube_plugin
     $select->add($this->gettext('daily'), 'daily');
     $select->add($this->gettext('weekly'), 'weekly');
     $select->add($this->gettext('monthly'), 'monthly');
-    $table->add('', $select->show());
+    $table->add('', $select->show($frequency));
 
     $table->add('title', html::label('', $this->gettext('maxlength')));
     $table->add('',  html::tag('input', array(
@@ -142,6 +142,7 @@ class junk_report extends rcube_plugin
   function not_junk_body()
   {
     // TODO authenticate
+
     //return html::p(array('class' => ''), $this->gettext('auth_failed'));
 
     // TODO mark as not junk
