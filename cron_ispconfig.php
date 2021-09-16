@@ -96,7 +96,7 @@ foreach ($arrayEmailKeys as $email){
 		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
 //print_r($maildir);
 		foreach ($sortedJunkDirectory as $junk){
-       			if ($junk != '.' && $junk != '..' && $nbMails<=10){
+       			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
 
 				//Get sender
@@ -113,8 +113,6 @@ foreach ($arrayEmailKeys as $email){
 
 				//Get mail uid
 				$uid = getUID($uidFile,$junk);
-
-print_r($sender);
 
 				$mail["sender"]=$sender;
        				$mail["date"]=$date;
@@ -151,10 +149,10 @@ print_r($sender);
 			$table .= '<td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
 			$table .= '<td>'.$mail["date"].'</td>';
 			$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
-			$table .= '<td style="border:1px solid">';
-//			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
+			$table .= '<td style="border:1px solid; width : 50px">';
+			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
 			$table .= '</td>';
-			$table .= '<td style="border:1px solid">';
+			$table .= '<td style="border:1px solid; width : 70px">';
 			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=show">Voir le mail</a>';
 			$table .= '</td>';
 			$table .= '</tr>';
@@ -174,7 +172,7 @@ print_r($sender);
 		if (!$added_table){
 			$message .= $table;
 		}
-//	    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
+	    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
 		sleep($config['sleep_time']);
 	}
 }

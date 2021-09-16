@@ -48,7 +48,6 @@ rcube_webmail.prototype.rcmail_junk_report_move = function(uid) {
 		console.log(rcmail.message_list);
 	}, 2000);
 */
-
 	//V4
 
 	//rcmail.env.uid = uid;
@@ -82,9 +81,19 @@ rcube_webmail.prototype.rcmail_junk_report_move = function(uid) {
 	//rcmail.addEventListener('beforelist', function() { window.alert("beforelist"); });
 	//rcmail.addEventListener('show-list', function() { window.alert("show-list"); });
 */
+
 	rcmail.addEventListener('init', function() {
-		rcmail.command('list', 'Junk');
+
+	cmd = setTimeout(function() {
+		rcmail.command('plugin.markasjunk2.not_junk');
+//		rcmail.command('list', 'Junk');
+		}, 1000);
+		console.log("list");
+	redirect = setTimeout(function() {
+		document.location.href="https://mail4.ircf.fr/?_task=mail&_mbox=Junk";
+	}, 6000);
 	});
+//	rcmail.command('plugin.markasjunk2.not_junk');
 
 /*
         rcmail.addEventListener('init', function() {
@@ -104,4 +113,8 @@ rcube_webmail.prototype.rcmail_junk_report_move = function(uid) {
 		console.log(rcmail.message_list);
         }, 2000);
 */
+
+//        this.show_message(uid);
+
+
 }

@@ -12,7 +12,7 @@ class junk_report extends rcube_plugin
 {
   const DEFAULT_JUNKDIR = 'Junk'; // TODO config option
   const DEFAULT_FREQUENCY = 'never'; // TODO config option
-  const DEFAULT_MAXLENGTH = 100; // TODO config option
+  const DEFAULT_MAXLENGTH = 20; // TODO config option
   public $task = 'mail|settings';
   private $user;
   private $prefs;
@@ -87,6 +87,7 @@ class junk_report extends rcube_plugin
       'name' => '_maxlength',
       'value' => $maxlength,
       'min' => 1,
+      'max' => 30,
       'required' => true
     )));
 
@@ -167,22 +168,8 @@ class junk_report extends rcube_plugin
     // Maybe it could be the cache?
 
     $this->rcmail->output->set_env('uid', $uid);
+
     $this->rcmail->output->command('rcmail_junk_report_move', $uid);
-
-    //$is_spam = false;
-    $multi_folder = false;
-    $messageset = rcmail::get_uids();
-    //$mbox_name = 'Junk';
-    $dest_mbox = 'INBOX';
-
-    $this->_do_salearn($uid,false); 	//This is the function that learns the Bayensian
-
-    //if ($this->rcmail->storage->move_message($uid, 'INBOX', 'Junk')) echo "<script>console.log('moved')</script>";
-    //$this->rcmail->output->command('rcmail_markasjunk2', 'not_junk');
-    $this->api->output->command('rcmail_markasjunk2_move', $dest_mbox, $this->_messageset_to_uids($messageset, $multi_folder));
-
-    //$this->api->output->command('display_message', $is_spam ? $this->gettext('reportedasjunk') : $this->gettext('reportedasnotjunk'), 'confirmation');
-    //$this->api->output->send(); 	//make 404
 
     return html::p(array('class' => ''), $this->gettext('not_junk_done'));
   }
