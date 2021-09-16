@@ -97,6 +97,9 @@ function getMailDate($file){
 		case "Feb":
 			$month = "Fevrier";
 			break;
+		case "Mar":
+			$month = "Mars";
+			break;
 		case "Apr":
 			$month = "Avril";
 			break;
