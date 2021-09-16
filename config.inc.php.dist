@@ -35,6 +35,7 @@ $config['no_subject'] = "Aucun objet";
 //Header settings
 $header[] = "From : ";
 $header[] = "Content-type: text/html; charset=UTF-8";
+$header[] = "MIME-Version: 1.0" . "\r\n";
 
 //Subject of the junk report
 $config['subject'] = "Rapport de spam";
