@@ -63,11 +63,17 @@ function matchPrefstoEmail($requete_ispc,$tab,$config){
 */
 
 function getSender($file){
-	return $sender = substr(preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]],6);
+
+	$fromLine = preg_grep("/^From:/",$file)[array_keys(preg_grep("/^From:/",$file))[0]];
+	if (strpos($fromLine,"<")) {
+		return $sender = substr($fromLine, strpos($fromLine, "<") + 1, strpos($fromLine, ">") - strpos($fromLine, "<") - 1);
+	} else {
+		return $sender = substr($fromLine, 6);
+	}
 }
 
 /*
-*	Get the date of a mail from hisstored file given in parameters.
+*	Get the date of a mail from his stored file given in parameters.
 *	Return the date translated in French
 */
 
