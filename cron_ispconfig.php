@@ -90,11 +90,11 @@ foreach ($arrayEmailKeys as $email){
 	      		$date = filemtime("$maildir/Maildir/.Junk/cur/$junk");
       			$sortedJunkDirectory["$date"] = $junk;
     		}
-	    	ksort($sortedJunkDirectory);
+	    	krsort($sortedJunkDirectory);
 
 		$nbMails=1;
 		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
-//print_r($maildir);
+
 		foreach ($sortedJunkDirectory as $junk){
        			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
@@ -128,6 +128,7 @@ foreach ($arrayEmailKeys as $email){
 
 	if (!empty($listeMail)){
 	    	$adresseMail = "lucas.raynaud@ircf.fr";
+		if (($adresseMail == "lucas.raynaud@ircf.fr") || ($adresseMail == "technique@ircf.fr")){
 	    	$date = getdate()["mday"];
     		$date .= getdate()["mon"];
 	    	$date .= getdate()["year"];
@@ -172,7 +173,8 @@ foreach ($arrayEmailKeys as $email){
 		if (!$added_table){
 			$message .= $table;
 		}
-	    	mail($adresseMail,$subject,$message,implode("\r\n", $header));
-		sleep($config['sleep_time']);
+			mail($adresseMail,$subject,$message,implode("\r\n", $header));
+			sleep($config['sleep_time']);
+		}
 	}
 }
