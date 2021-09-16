@@ -12,7 +12,7 @@ class junk_report extends rcube_plugin
 {
   const DEFAULT_JUNKDIR = 'Junk'; // TODO config option
   const DEFAULT_FREQUENCY = 'never'; // TODO config option
-  const DEFAULT_MAXLENGTH = 20; // TODO config option
+  const DEFAULT_MAXLENGTH = 30; // TODO config option
   public $task = 'mail|settings';
   private $user;
   private $prefs;
@@ -64,8 +64,8 @@ class junk_report extends rcube_plugin
   {
     //read from user preferences
     if (!(isset($this->prefs["frequency"]) && isset($this->prefs["maxlength"]))) {
-      $frequency = self::DEFAULT_FREQUENCY;
-      $maxlength = self::DEFAULT_MAXLENGTH;
+      $frequency = $config['default_frequency'];
+      $maxlength = $config['default_maxlength'];
     } else {
       $frequency = $this->prefs["frequency"];
       $maxlength = $this->prefs["maxlength"];
@@ -87,7 +87,7 @@ class junk_report extends rcube_plugin
       'name' => '_maxlength',
       'value' => $maxlength,
       'min' => 1,
-      'max' => 30,
+      'max' => $config['default_maxlength'],
       'required' => true
     )));
 
@@ -185,71 +185,4 @@ class junk_report extends rcube_plugin
     // TODO
   }
 
-private function _messageset_to_uids($messageset, $multi_folder)
-        {
-                $a_uids = array();
-
-                foreach ($messageset as $mbox => $uids) {
-                        foreach ($uids as $uid) {
-                                $a_uids[] = $multi_folder ? $uid . '-' . $mbox : $uid;
-                        }
-                }
-
-                return $a_uids;
-	}
-
-// Maybe make a driver for it, but this function is only used in one situation
-
-private function _do_salearn($uids, $spam)
-        {
-                $rcmail = rcube::get_instance();
-                $temp_dir = realpath($rcmail->config->get('temp_dir'));
-
-                if ($spam)
-                        $command = $rcmail->config->get('markasjunk2_spam_cmd');
-                else
-                        $command = $rcmail->config->get('markasjunk2_ham_cmd');
-
-                if (!$command)
-                        return;
-
-                $command = str_replace('%u', $_SESSION['username'], $command);
-                $command = str_replace('%l', $rcmail->user->get_username('local'), $command);
-                $command = str_replace('%d', $rcmail->user->get_username('domain'), $command);
-                if (preg_match('/%i/', $command)) {
-                        $identity_arr = $rcmail->user->get_identity();
-                        $command = str_replace('%i', $identity_arr['email'], $command);
-                }
-
-                foreach ($uids as $uid) {
-                        // reset command for next message
-                        $tmp_command = $command;
-
-                        // get DSPAM signature from header (if %xds macro is used)
-                        if (preg_match('/%xds/', $command)) {
-                                if (preg_match('/^X\-DSPAM\-Signature:\s+((\d+,)?([a-f\d]+))\s*$/im', $rcmail->storage->get_raw_headers($uid), $dspam_signature))
-                                        $tmp_command = str_replace('%xds', $dspam_signature[1], $tmp_command);
-                                else
-                                        continue; // no DSPAM signature found in headers -> continue with next uid/message
-                        }
-
-		if (preg_match('/%f/', $command)) {
-                                $tmpfname = tempnam($temp_dir, 'rcmSALearn');
-                                file_put_contents($tmpfname, $rcmail->storage->get_raw_body($uid));
-                                $tmp_command = str_replace('%f', $tmpfname, $tmp_command);
-                        }
-
-                        exec($tmp_command, $output);
-
-                        if ($rcmail->config->get('markasjunk2_debug')) {
-                                rcube::write_log('markasjunk2', $tmp_command);
-                                rcube::write_log('markasjunk2', $output);
-                        }
-
-                        if (preg_match('/%f/', $command))
-                                unlink($tmpfname);
-
-                        $output = '';
-                }
-        }
 }
