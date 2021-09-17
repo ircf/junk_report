@@ -13,7 +13,9 @@ include('function.php');
 
 //read all users prefs
 
+
 //Roundcube
+
 
 $dsnArray = formatDSN($config['db_dsnw']);
 $dsn = $dsnArray[0];
@@ -24,17 +26,20 @@ try {
   $conn = new PDO($dsn, $username, $password);
   // set the PDO error mode to exception
   $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  echo "Connected successfully to roundcube\n";
+//  echo "Connected successfully to roundcube\n";
 } catch(PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
+//  echo "Connection failed: " . $e->getMessage();
 }
+
 $mail_host = $config["mail_host"];
 $sql = "SELECT username,preferences FROM users WHERE mail_host='$mail_host' ;";
 $requete = $conn->query($sql);
 
 $tab =  setPreferencesArray($requete,$config);
 
+
 //ISPConfig
+
 
 $dsnArray_ispc = formatDSN($config['dsn_ispconfig']);
 $dsn = $dsnArray_ispc[0];
@@ -45,9 +50,9 @@ try {
   $conn_ispc = new PDO($dsn, $username, $password);
   // set the PDO error mode to exception
   $conn_ispc->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  echo "Connected successfully to ispconfig \n";
+//  echo "Connected successfully to ispconfig \n";
 } catch(PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
+//  echo "Connection failed: " . $e->getMessage();
 }
 
 $sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=8 AND active='y';";
@@ -55,20 +60,28 @@ $requete_ispc = $conn_ispc->query($sql);
 
 $tabPrefs = matchPrefstoEmail($requete_ispc,$tab,$config);
 
+
 //Read today's date
 
 $monthDay = date('d');
 $weekDay = date('l');
+
+if (($weekDay != "Saturday")||($weekday != "Sunday"))
+  $daily = true;
+else
+  $daily = false;
 
 if ($weekDay == $config['day_of_weekly_report'])
   $weekly = true;
 else
   $weekly = false;
 
+
 if ($monthDay == $config['day_of_monthly_report'])
   $monthly = true;
 else
   $monthly = false;
+
 
 //parse junkdirs and send report
 
@@ -79,9 +92,9 @@ foreach ($arrayEmailKeys as $email){
 	$currentAdress = $tabPrefs[$email];
 	array_splice($listeMail,0);
 	$frequency = $currentAdress["frequency"];
-        $maxlength = $currentAdress["maxlength"];
+	if ($currentAdress["maxlength"] > $config['default_maxlength']) { $maxlength = $config['default_maxlength']; } else { $maxlength = $currentAdress['maxlength'];  }
 	$maildir = $currentAdress["maildir"];
-	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily"))){
+	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily" && $daily))){
         	$junkDirectory = scandir("$maildir/Maildir/.Junk/cur");
 
 		//Sort spam by date (new first)
@@ -94,7 +107,6 @@ foreach ($arrayEmailKeys as $email){
 
 		$nbMails=1;
 		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
-
 		foreach ($sortedJunkDirectory as $junk){
        			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
@@ -125,10 +137,9 @@ foreach ($arrayEmailKeys as $email){
        			}
 		}
 	}
-
 	if (!empty($listeMail)){
-	    	$adresseMail = "lucas.raynaud@ircf.fr";
-		if (($adresseMail == "lucas.raynaud@ircf.fr") || ($adresseMail == "technique@ircf.fr")){
+		if (strpos($email,"@ircf.fr")){
+//		print_r($email);
 	    	$date = getdate()["mday"];
     		$date .= getdate()["mon"];
 	    	$date .= getdate()["year"];
@@ -173,8 +184,10 @@ foreach ($arrayEmailKeys as $email){
 		if (!$added_table){
 			$message .= $table;
 		}
-			mail($adresseMail,$subject,$message,implode("\r\n", $header));
-			sleep($config['sleep_time']);
+		$email = "lucas.raynaud@ircf.fr";
+		mail($email,$subject,$message,implode("\r\n", $header));
+		sleep($config['sleep_time']);
 		}
+
 	}
 }

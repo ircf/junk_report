@@ -10,9 +10,6 @@
  */
 class junk_report extends rcube_plugin
 {
-  const DEFAULT_JUNKDIR = 'Junk'; // TODO config option
-  const DEFAULT_FREQUENCY = 'never'; // TODO config option
-  const DEFAULT_MAXLENGTH = 30; // TODO config option
   public $task = 'mail|settings';
   private $user;
   private $prefs;

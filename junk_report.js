@@ -84,37 +84,11 @@ rcube_webmail.prototype.rcmail_junk_report_move = function(uid) {
 
 	rcmail.addEventListener('init', function() {
 
-	cmd = setTimeout(function() {
-		rcmail.command('plugin.markasjunk2.not_junk');
-//		rcmail.command('list', 'Junk');
+		cmd = setTimeout(function() {
+			rcmail.command('plugin.markasjunk2.not_junk');
 		}, 1000);
-		console.log("list");
-	redirect = setTimeout(function() {
-		document.location.href="https://mail4.ircf.fr/?_task=mail&_mbox=Junk";
-	}, 6000);
+		redirect = setTimeout(function() {
+			document.location.href="https://mail4.ircf.fr/?_task=mail&_mbox=Junk";
+		}, 6000);
 	});
-//	rcmail.command('plugin.markasjunk2.not_junk');
-
-/*
-        rcmail.addEventListener('init', function() {
-                console.log("eventListener");
-                cmdMove = setTimeout(function() {
-                        uid =rcmail.env.uid;
-                        console.log(uid);
-                        str = ".subject a[href*=\"uid="+uid+"\"]";
-                        //$(str).closest('.message').trigger('mousedown').trigger('mouseup');
-                        rcmail.command('plugin.markasjunk2.not_junk', 'Junk');
-                        console.log("have been moved");
-                }, 1000);
-        });
-
-        setTimeout(function() {
-                rcmail.command('list', 'Junk');
-		console.log(rcmail.message_list);
-        }, 2000);
-*/
-
-//        this.show_message(uid);
-
-
 }

@@ -17,14 +17,26 @@
 	<p>Cordialement,</p>
 
 	<br>
-	<p>Service technique IRCF</p>
-	<p>Pour la maintenance de votre site internet et de votre messagerie</p>
-	<p>Tél. : </p>
-	<p>E-mail : </p>
 
-	<br>
-	
-	<p>www.ircf.fr</p>
+      	<div style="color:#218990; font-style: italic;"> Tél. : <a
+          style="color:#218990; text-decoration: none;"
+          href="tel:+33553466106">05 53 46 61 06</a><br>
+        E-mail : <a style="color:#218990; text-decoration: none;"
+          href="mailto:technique@ircf.fr">technique@ircf.fr</a>
+      	</div>
+      	<br>
+      	<address style="font-weight: bold; font-size: 12px; line-height:
+        20px; border-top: #218990 solid 1px; border-bottom: #218990
+        solid 1px; max-width: 250px; padding-top: 10px; padding-bottom:
+        10px;"> 19, rue de la Prairie<br>
+        24430 Marsac-sur-l'Isle<br>
+        Tél. <a style="text-decoration: none; color: #000000;"
+          href="tel:+33553467179">05 53 46 71 79</a>
+      	</address>
+      	<p style="font-size: 12px; line-height: 20px; font-weight: bold;
+        font-style: italic;"> <a style="text-decoration: none; color:
+          #000000;" href="https://ircf.fr/">www.ircf.fr</a>
+      	</p>
 	<br>
 	
 	<p>Les données et renseignements contenus dans ce message sont personnels, confidentiels et secrets. Toute publication, utilisation ou diffusion, même partielle, doit être autorisée.</p>
