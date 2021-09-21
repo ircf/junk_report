@@ -26,3 +26,4 @@ $labels['not_junk'] = 'Mark as not junk';
 $labels['auth_failed'] = 'Authentication failed, the link used has expired.';
 $labels['not_junk_done'] = 'This message has been marked as not junk and moved to your inbox.';
 $labels['cron_done'] = 'Messages sent';
+$labels['waiting'] = 'Please be patien the spam is being restored.';

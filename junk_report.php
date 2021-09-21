@@ -168,7 +168,7 @@ class junk_report extends rcube_plugin
 
     $this->rcmail->output->command('rcmail_junk_report_move', $uid);
 
-    return html::p(array('class' => ''), $this->gettext('not_junk_done'));
+    return html::p(array('class' => ''), $this->gettext('waiting'));
   }
 
   /**
