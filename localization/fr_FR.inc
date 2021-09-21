@@ -26,4 +26,4 @@ $labels['not_junk'] = 'Marquer en non pourriel';
 $labels['auth_failed'] = "L'authentification a échouée, le lien utilisé n'est plus valide.";
 $labels['not_junk_done'] = 'Ce message a été marqué en non pourriel et remis dans votre boite de réception.';
 $labels['cron_done'] = 'Rapports envoyés';
-$labels['waiting'] = 'Veuillez patienter le pourriel est entrain d'être rétabli.';
+$labels['waiting'] = "Veuillez patienter le pourriel est entrain d'être rétabli.";

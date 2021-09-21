@@ -26,9 +26,8 @@ try {
   $conn = new PDO($dsn, $username, $password);
   // set the PDO error mode to exception
   $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//  echo "Connected successfully to roundcube\n";
 } catch(PDOException $e) {
-//  echo "Connection failed: " . $e->getMessage();
+  echo "Connection failed: " . $e->getMessage();
 }
 
 $mail_host = $config["mail_host"];
@@ -50,16 +49,14 @@ try {
   $conn_ispc = new PDO($dsn, $username, $password);
   // set the PDO error mode to exception
   $conn_ispc->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//  echo "Connected successfully to ispconfig \n";
 } catch(PDOException $e) {
-//  echo "Connection failed: " . $e->getMessage();
+  echo "Connection failed: " . $e->getMessage();
 }
 
 $sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=8 AND active='y';";
 $requete_ispc = $conn_ispc->query($sql);
 
 $tabPrefs = matchPrefstoEmail($requete_ispc,$tab,$config);
-
 
 //Read today's date
 
@@ -138,9 +135,8 @@ foreach ($arrayEmailKeys as $email){
 		}
 	}
 	if (!empty($listeMail)){
-		if (strpos($email,"@ircf.fr")){
-//		print_r($email);
-	    	$date = getdate()["mday"];
+		if ((strpos($email,"@ircf.fr"))||(strpos($email,"@akiway.com"))){
+	   	$date = getdate()["mday"];
     		$date .= getdate()["mon"];
 	    	$date .= getdate()["year"];
 	    	$subject = $config['subject'];
@@ -184,7 +180,6 @@ foreach ($arrayEmailKeys as $email){
 		if (!$added_table){
 			$message .= $table;
 		}
-		$email = "lucas.raynaud@ircf.fr";
 		mail($email,$subject,$message,implode("\r\n", $header));
 		sleep($config['sleep_time']);
 		}
