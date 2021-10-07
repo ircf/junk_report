@@ -146,16 +146,16 @@ foreach ($arrayEmailKeys as $email){
 		$table_line = array_keys(preg_grep("/{{spam_table}}/",$template_mail))[0];
 		$table .= '<table style="border:1px solid; border-collapse:collapse">';
 		$table .= '<tr>';
-		$table .= '<th>Objet</th>';
+		$table .= '<th style="border:1px solid">Objet</th>';
 		$table .= '<th style="border:1px solid">Envoyé par</th>';
-		$table .= '<th>Date</th>';
+		$table .= '<th style="border:1px solid">Date</th>';
 		$table .= '<th style="border:1px solid">Spam Score</th>';
 		$table .= '</tr>';
 	    	foreach ($listeMail as $mail){
       			$table .= '<tr style="border:1px solid">';
-			$table .= '<td>'.$mail["subject"].'</td>';
+			$table .= '<td style="border:1px solid">'.$mail["subject"].'</td>';
 			$table .= '<td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
-			$table .= '<td>'.$mail["date"].'</td>';
+			$table .= '<td style="border:1px solid">'.$mail["date"].'</td>';
 			$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
 			$table .= '<td style="border:1px solid; width : 50px">';
 			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
