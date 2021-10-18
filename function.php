@@ -87,9 +87,10 @@ function getMailDate($file){
 		$date = substr(explode(":",preg_grep("/^Date:/",$file)[array_keys(preg_grep("/^Date:/",$file))[0]])[1],0,12);
 	}
 	$arrayDate = explode(" ",$date);
-	$day = $arrayDate[1];
-	$month = $arrayDate[2];
-	$year = $arrayDate[3];
+	$arraySize = count($arrayDate);
+	$day = $arrayDate[$arraySize-3];
+	$month = $arrayDate[$arraySize-2];
+	$year = $arrayDate[$arraySize-1];
 	$monthTab["Jan"] = "Janvier";
 	$monthTab["Feb"] = "Fevrier";
 	$monthTab["Mar"] = "Mars";
@@ -132,10 +133,10 @@ function getUID($uidFile, $junk){
 */
 
 function getSubject($file, $config){
-	if (preg_grep("/^Subject:/",$file))
+	if (preg_grep("/^Subject:/",$file) && !empty(array_keys(preg_grep("/^Subject: /",$file)))){
 		$junk_subject = substr(preg_grep("/^Subject:/",$file)[array_keys(preg_grep("/^Subject: /",$file))[0]],9);
-       	else
+	}else{
     		$junk_subject = $config['no_subject'];
-
+	}
 	return $junk_subject;
 }
