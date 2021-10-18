@@ -1,15 +1,15 @@
 <?php
 //load rc config file
 
-include('/opt/roundcubemail/config/config.inc.php');
+require( __DIR__ . '/../../config/config.inc.php');
 
 //load config file
 
-include('config.inc.php');
+require( __DIR__ . '/config.inc.php');
 
 //load function file
 
-include('function.php');
+require( __DIR__ . '/function.php');
 
 //read all users prefs
 
@@ -53,7 +53,7 @@ try {
   echo "Connection failed: " . $e->getMessage();
 }
 
-$sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=8 AND active='y';";
+$sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=7 AND active='y';";
 $requete_ispc = $conn_ispc->query($sql);
 
 $tabPrefs = matchPrefstoEmail($requete_ispc,$tab,$config);

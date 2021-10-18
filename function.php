@@ -44,7 +44,7 @@ function formatDSN($dsn){
 */
 
 function matchPrefstoEmail($requete_ispc,$tab,$config){
-
+	$tabPrefs = array();
 	foreach($requete_ispc->fetchAll() as $personne){
 		if (isset($tab[$personne['email']])){
     			$tabPrefs[$personne['email']] = array("frequency" => $tab[$personne['email']]['frequency'],
