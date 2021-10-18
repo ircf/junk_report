@@ -90,45 +90,20 @@ function getMailDate($file){
 	$day = $arrayDate[1];
 	$month = $arrayDate[2];
 	$year = $arrayDate[3];
-	switch ($month) {
-		case "Jan":
-			$month = "Janvier";
-			break;
-		case "Feb":
-			$month = "Fevrier";
-			break;
-		case "Mar":
-			$month = "Mars";
-			break;
-		case "Apr":
-			$month = "Avril";
-			break;
-		case "May":
-			$month = "Mai";
-			break;
-		case "Jun":
-			$month = "Juin";
-			break;
-		case "Jul":
-                        $month = "Juillet";
-                        break;
-		case "Aug":
-                        $month = "Aout";
-                        break;
-		case "Sep":
-                        $month = "Septembre";
-                        break;
-		case "Oct":
-                        $month = "Octobre";
-                        break;
-		case "Nov":
-                        $month = "Novembre";
-                        break;
-		case "Dec":
-                        $month = "Decembre";
-                        break;
-	}
-	$formattedDate = $day." ".$month." ".$year;
+	$monthTab["Jan"] = "Janvier";
+	$monthTab["Feb"] = "Fevrier";
+	$monthTab["Mar"] = "Mars";
+	$monthTab["Apr"] = "Avril";
+	$monthTab["May"] = "Mai";
+	$monthTab["Jun"] = "Juin";
+	$monthTab["Jul"] = "Juillet";
+        $monthTab["Aug"] = "Aout";
+        $monthTab["Sep"] = "Septembre";
+        $monthTab["Oct"] = "Octobre";
+        $monthTab["Nov"] = "Novembre";
+	$monthTab["Dec"] = "Decembre";
+
+	$formattedDate = $day." ".$monthTab[$month]." ".$year;
 	return $formattedDate;
 }
 
