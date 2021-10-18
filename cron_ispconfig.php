@@ -63,22 +63,11 @@ $tabPrefs = matchPrefstoEmail($requete_ispc,$tab,$config);
 $monthDay = date('d');
 $weekDay = date('l');
 
-if (($weekDay != "Saturday")||($weekday != "Sunday"))
-  $daily = true;
-else
-  $daily = false;
+$daily = $weekDay != "Saturday" && $weekDay != "Sunday";
 
-if ($weekDay == $config['day_of_weekly_report'])
-  $weekly = true;
-else
-  $weekly = false;
+$weekly = $weekDay == $config['day_of_weekly_report'];
 
-
-if ($monthDay == $config['day_of_monthly_report'])
-  $monthly = true;
-else
-  $monthly = false;
-
+$monthly = $monthDay == $config['day_of_monthly_report'];
 
 //parse junkdirs and send report
 
@@ -102,10 +91,10 @@ foreach ($arrayEmailKeys as $email){
     		}
 	    	krsort($sortedJunkDirectory);
 
-		$nbMails=1;
+		$nbMails=0;
 		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
 		foreach ($sortedJunkDirectory as $junk){
-       			if ($junk != '.' && $junk != '..' && $nbMails<=$maxlength){
+       			if ($junk != '.' && $junk != '..' && $nbMails<$maxlength){
 		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
 
 				//Get sender
@@ -133,56 +122,53 @@ foreach ($arrayEmailKeys as $email){
 				$nbMails++;
        			}
 		}
-	}
-	if (!empty($listeMail)){
-		if ((strpos($email,"@ircf.fr"))||(strpos($email,"@akiway.com"))){
-	   	$date = getdate()["mday"];
-    		$date .= getdate()["mon"];
-	    	$date .= getdate()["year"];
-	    	$subject = $config['subject'];
-		$message = "";
-		$table = "";
-		$template_mail = file($config["path_to_mail"]);
-		$table_line = array_keys(preg_grep("/{{spam_table}}/",$template_mail))[0];
-		$table .= '<table style="border:1px solid; border-collapse:collapse">';
-		$table .= '<tr>';
-		$table .= '<th style="border:1px solid">Objet</th>';
-		$table .= '<th style="border:1px solid">Envoyé par</th>';
-		$table .= '<th style="border:1px solid">Date</th>';
-		$table .= '<th style="border:1px solid">Spam Score</th>';
-		$table .= '</tr>';
-	    	foreach ($listeMail as $mail){
-      			$table .= '<tr style="border:1px solid">';
-			$table .= '<td style="border:1px solid">'.$mail["subject"].'</td>';
-			$table .= '<td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
-			$table .= '<td style="border:1px solid">'.$mail["date"].'</td>';
-			$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
-			$table .= '<td style="border:1px solid; width : 50px">';
-			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
-			$table .= '</td>';
-			$table .= '<td style="border:1px solid; width : 70px">';
-			$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=show">Voir le mail</a>';
-			$table .= '</td>';
+		if (!empty($listeMail)){
+		   	$date = getdate()["mday"];
+    			$date .= getdate()["mon"];
+	    		$date .= getdate()["year"];
+	    		$subject = $config['subject'];
+			$message = "";
+			$table = "";
+			$template_mail = file($config["path_to_mail"]);
+			$table_line = array_keys(preg_grep("/{{spam_table}}/",$template_mail))[0];
+			$table .= '<table style="border:1px solid; border-collapse:collapse">';
+			$table .= '<tr>';
+			$table .= '<th style="border:1px solid">Objet</th>';
+			$table .= '<th style="border:1px solid">Envoyé par</th>';
+			$table .= '<th style="border:1px solid">Date</th>';
+			$table .= '<th style="border:1px solid">Spam Score</th>';
 			$table .= '</tr>';
-		}
-		$table .= '</table>';
-		$count = 0;
-		$added_table = false;
-		foreach ($template_mail as $line){
-			if ($count == $table_line){
-				$message .= $table;
-				$added_table = true;
-			}else{
-				$message .= $line;
+	    		foreach ($listeMail as $mail){
+      				$table .= '<tr style="border:1px solid">';
+				$table .= '<td style="border:1px solid">'.$mail["subject"].'</td>';
+				$table .= '<td style="border:1px solid">'.htmlspecialchars($mail["sender"]).'</td>';
+				$table .= '<td style="border:1px solid">'.$mail["date"].'</td>';
+				$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
+				$table .= '<td style="border:1px solid; width : 50px">';
+				$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
+				$table .= '</td>';
+				$table .= '<td style="border:1px solid; width : 70px">';
+				$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=show">Voir le mail</a>';
+				$table .= '</td>';
+				$table .= '</tr>';
 			}
-			$count++;
+			$table .= '</table>';
+			$count = 0;
+			$added_table = false;
+			foreach ($template_mail as $line){
+				if ($count == $table_line){
+					$message .= $table;
+					$added_table = true;
+				}else{
+					$message .= $line;
+				}
+				$count++;
+			}
+			if (!$added_table){
+				$message .= $table;
+			}
+			//mail($email,$subject,$message,implode("\r\n", $header));
+			//sleep($config['sleep_time']);
 		}
-		if (!$added_table){
-			$message .= $table;
-		}
-		mail($email,$subject,$message,implode("\r\n", $header));
-		sleep($config['sleep_time']);
-		}
-
 	}
 }
