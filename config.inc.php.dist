@@ -9,6 +9,9 @@
 //Formatted dsn of ispconfig db
 $config['dsn_ispconfig'] = "mysql://user:pass@server/dbname";
 
+//Server id for ISPConfig
+$config['server_id'] = X;
+
 //Name of the mail host
 $config['mail_host']="name.host";
 
@@ -33,16 +36,15 @@ $config['day_of_monthly_report'] = 01;
 $config['no_subject'] = "Aucun objet";
 
 //Header settings
-$header[] = "From : ";
+$header[] = "From: do-not-reply@domain.com";
 $header[] = "Content-type: text/html; charset=UTF-8";
 $header[] = "MIME-Version: 1.0" . "\r\n";
-$header[] = "reply-to : <>";
 
 //Subject of the junk report
 $config['subject'] = "Rapport de spam";
 
-//Sleep time between sending emails in micro secondes
-$config['sleep_time'] = 200000;
+//Sleep time between sending emails in seconds
+$config['sleep_time'] = 2;
 
 // Absolute path of the file containing the mail to send
 // Must to be written in html

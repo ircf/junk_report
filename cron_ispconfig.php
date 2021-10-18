@@ -53,7 +53,7 @@ try {
   echo "Connection failed: " . $e->getMessage();
 }
 
-$sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=7 AND active='y';";
+$sql = "SELECT email,maildir FROM mail_user,mail_domain WHERE mail_user.email LIKE CONCAT('%',mail_domain.domain) AND postfix='y' AND mail_user.server_id=".$config['server_id']." AND active='y';";
 $requete_ispc = $conn_ispc->query($sql);
 
 $tabPrefs = matchPrefstoEmail($requete_ispc,$tab,$config);
@@ -167,8 +167,8 @@ foreach ($arrayEmailKeys as $email){
 			if (!$added_table){
 				$message .= $table;
 			}
-			//mail($email,$subject,$message,implode("\r\n", $header));
-			//sleep($config['sleep_time']);
+			mail($email,$subject,$message,implode("\r\n", $header));
+			sleep($config['sleep_time']);
 		}
 	}
 }
