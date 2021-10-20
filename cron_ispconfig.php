@@ -145,10 +145,10 @@ foreach ($arrayEmailKeys as $email){
 				$table .= '<td style="border:1px solid">'.$mail["date"].'</td>';
 				$table .= '<td style="border:1px solid">'.$mail["spam_score"].'</td>';
 				$table .= '<td style="border:1px solid; width : 50px">';
-				$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
+				$table .= '<a href="https://mail1.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=plugin.junk_report.not_junk">Rétablir</a>';
 				$table .= '</td>';
 				$table .= '<td style="border:1px solid; width : 70px">';
-				$table .= '<a href="https://mail4.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=show">Voir le mail</a>';
+				$table .= '<a href="https://mail1.ircf.fr/?_task=mail&_uid='.$mail["uid"].'&_mbox=Junk&_action=show">Voir le mail</a>';
 				$table .= '</td>';
 				$table .= '</tr>';
 			}

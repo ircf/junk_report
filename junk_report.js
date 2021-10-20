@@ -88,7 +88,7 @@ rcube_webmail.prototype.rcmail_junk_report_move = function(uid) {
 			rcmail.command('plugin.markasjunk2.not_junk');
 		}, 1000);
 		redirect = setTimeout(function() {
-			document.location.href="https://mail4.ircf.fr/?_task=mail&_mbox=Junk";
+			document.location.href="https://mail1.ircf.fr/?_task=mail&_mbox=Junk";
 		}, 6000);
 	});
 }
