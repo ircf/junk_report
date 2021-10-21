@@ -81,8 +81,13 @@ foreach ($arrayEmailKeys as $email){
 	if ($currentAdress["maxlength"] > $config['default_maxlength']) { $maxlength = $config['default_maxlength']; } else { $maxlength = $currentAdress['maxlength'];  }
 	$maildir = $currentAdress["maildir"];
 	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily" && $daily))){
-        	$junkDirectory = scandir("$maildir/Maildir/.Junk/cur");
-
+       		$junkDirectory = array();
+		$junkDirectoryHandle = opendir("$maildir/Maildir/.Junk/cur");
+		while (false !== ($junkFile = readdir($junkDirectoryHandle))){
+			if ($junkFile != "." && $junkFile != ".."){
+				$junkDirectory[] = $junkFile;
+			}
+		}
 		//Sort spam by date (new first)
    		array_splice($sortedJunkDirectory,0);
 	    	foreach ($junkDirectory as $junk){
@@ -122,6 +127,7 @@ foreach ($arrayEmailKeys as $email){
 				$nbMails++;
        			}
 		}
+
 		if (!empty($listeMail)){
 		   	$date = getdate()["mday"];
     			$date .= getdate()["mon"];
@@ -169,6 +175,7 @@ foreach ($arrayEmailKeys as $email){
 			}
 			mail($email,$subject,$message,implode("\r\n", $header));
 			sleep($config['sleep_time']);
+			closedir($junkDirectoryHandle);
 		}
 	}
 }
