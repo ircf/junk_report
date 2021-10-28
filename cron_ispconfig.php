@@ -81,17 +81,26 @@ foreach ($arrayEmailKeys as $email){
 	if ($currentAdress["maxlength"] > $config['default_maxlength']) { $maxlength = $config['default_maxlength']; } else { $maxlength = $currentAdress['maxlength'];  }
 	$maildir = $currentAdress["maildir"];
 	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily" && $daily))){
+		print_r($email."\n");
+		// Get all Junk files
        		$junkDirectory = array();
-		$junkDirectoryHandle = opendir("$maildir/Maildir/.Junk/cur");
-		while (false !== ($junkFile = readdir($junkDirectoryHandle))){
-			if ($junkFile != "." && $junkFile != ".."){
-				$junkDirectory[] = $junkFile;
+		$junkDirectoryCurHandle = opendir("$maildir/Maildir/.Junk/cur");
+		while (false !== ($junkCurFile = readdir($junkDirectoryCurHandle))){
+			if ($junkCurFile != "." && $junkCurFile != ".."){
+				$junkDirectory[] = "$maildir/Maildir/.Junk/cur/".$junkCurFile;
 			}
 		}
+		$junkDirectoryNewHandle = opendir("$maildir/Maildir/.Junk/new");
+                while (false !== ($junkNewFile = readdir($junkDirectoryNewHandle))){
+                        if ($junkNewFile != "." && $junkNewFile != ".."){
+                                $junkDirectory[] ="$maildir/Maildir/.Junk/new/". $junkNewFile;
+                        }
+                }
+
 		//Sort spam by date (new first)
    		array_splice($sortedJunkDirectory,0);
 	    	foreach ($junkDirectory as $junk){
-	      		$date = filemtime("$maildir/Maildir/.Junk/cur/$junk");
+	      		$date = filemtime($junk);
       			$sortedJunkDirectory["$date"] = $junk;
     		}
 	    	krsort($sortedJunkDirectory);
@@ -100,7 +109,7 @@ foreach ($arrayEmailKeys as $email){
 		$uidFile = file("$maildir/Maildir/.Junk/dovecot-uidlist");
 		foreach ($sortedJunkDirectory as $junk){
        			if ($junk != '.' && $junk != '..' && $nbMails<$maxlength){
-		        	$file = file("$maildir/Maildir/.Junk/cur/$junk");
+		        	$file = file($junk);
 
 				//Get sender
                 		$sender = getSender($file);
@@ -113,10 +122,9 @@ foreach ($arrayEmailKeys as $email){
 
 				//Get spam score
 				$spam_score = getSpamScore($file);
-
+				print_r($date."\n");
 				//Get mail uid
 				$uid = getUID($uidFile,$junk);
-
 				$mail["sender"]=$sender;
        				$mail["date"]=$date;
 				$mail["subject"]=iconv_mime_decode($junk_subject);
@@ -175,7 +183,8 @@ foreach ($arrayEmailKeys as $email){
 			}
 			mail($email,$subject,$message,implode("\r\n", $header));
 			sleep($config['sleep_time']);
-			closedir($junkDirectoryHandle);
+			closedir($junkDirectoryCurHandle);
+			closedir($junkDirectoryNewHandle);
 		}
 	}
 }

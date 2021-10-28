@@ -123,7 +123,7 @@ function getSpamScore($file){
 */
 
 function getUID($uidFile, $junk){
-	$formattedJunk = explode(":","$junk")[0];
+	$formattedJunk = explode(":",substr(strrchr("$junk","/"),1))[0];
         return explode(" ",preg_grep("/$formattedJunk/",$uidFile)[array_keys(preg_grep("/$formattedJunk/",$uidFile))[0]])[0];
 }
 
