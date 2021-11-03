@@ -8,8 +8,14 @@
 function setPreferencesArray($requete,$config){
 
 	foreach ($requete->fetchAll() as $personne){
-  		$preferences = @unserialize($personne['preferences']);
-  		if (substr($personne['username'],-9) != ".disabled"){
+		$personne["preferences"] = preg_replace_callback('!s:(\d+):"(.*?)";!s',
+       			function($m){
+       				$len = strlen($m[2]);
+       				$result = "s:$len:\"{$m[2]}\";";
+       				return $result;
+		        },$personne["preferences"]);
+		$preferences = unserialize($personne['preferences']);
+ 		if (substr($personne['username'],-9) != ".disabled"){
     			if (isset($preferences['frequency']) && isset($preferences['maxlength'])){
       				$tab[$personne['username']] = array("frequency" => $preferences['frequency'], "maxlength" => $preferences['maxlength']);
     			}else{
