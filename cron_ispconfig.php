@@ -125,7 +125,7 @@ foreach ($arrayEmailKeys as $email){
 				print_r($date."\n");
 				//Get mail uid
 				$uid = getUID($uidFile,$junk);
-				$mail["sender"]=$sender;
+				$mail["sender"]=iconv_mime_decode($sender);
        				$mail["date"]=$date;
 				$mail["subject"]=iconv_mime_decode($junk_subject);
 				$mail["spam_score"]=$spam_score;
