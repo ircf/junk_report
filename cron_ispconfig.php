@@ -39,7 +39,6 @@ $tab =  setPreferencesArray($requete,$config);
 
 //ISPConfig
 
-
 $dsnArray_ispc = formatDSN($config['dsn_ispconfig']);
 $dsn = $dsnArray_ispc[0];
 $username = $dsnArray_ispc[1];
@@ -80,8 +79,7 @@ foreach ($arrayEmailKeys as $email){
 	$frequency = $currentAdress["frequency"];
 	if ($currentAdress["maxlength"] > $config['default_maxlength']) { $maxlength = $config['default_maxlength']; } else { $maxlength = $currentAdress['maxlength'];  }
 	$maildir = $currentAdress["maildir"];
-	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/cur")&& file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily" && $daily))){
-		print_r($email."\n");
+	if ($frequency!="never" && file_exists("$maildir/Maildir/.Junk/new")&& file_exists("$maildir/Maildir/.Junk/cur") && file_exists("$maildir/Maildir/.Junk/dovecot-uidlist") &&(($frequency == "weekly" && $weekly)||($frequency=="monthly" && $monthly)||($frequency=="daily" && $daily))){
 		// Get all Junk files
        		$junkDirectory = array();
 		$junkDirectoryCurHandle = opendir("$maildir/Maildir/.Junk/cur");
@@ -122,7 +120,6 @@ foreach ($arrayEmailKeys as $email){
 
 				//Get spam score
 				$spam_score = getSpamScore($file);
-				print_r($date."\n");
 				//Get mail uid
 				$uid = getUID($uidFile,$junk);
 				$mail["sender"]=$sender;
